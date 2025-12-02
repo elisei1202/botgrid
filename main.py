@@ -66,20 +66,14 @@ class GridTradingBot:
         setup_logging(self.config)
         
         # Load environment variables
-        # Try to load .env if exists (local development)
-        # Otherwise use environment variables directly (Render/production)
-        if os.path.exists('.env'):
-            load_dotenv()
+        load_dotenv()
         
         self.api_key = os.getenv('BYBIT_API_KEY')
         self.api_secret = os.getenv('BYBIT_API_SECRET')
-        
-        # Check ENVIRONMENT variable for testnet/mainnet
-        environment = os.getenv('ENVIRONMENT', 'testnet').lower()
-        self.testnet = environment == 'testnet'
+        self.testnet = self.config['api']['testnet']
         
         if not self.api_key or not self.api_secret:
-            raise ValueError("API credentials not found. Set BYBIT_API_KEY and BYBIT_API_SECRET environment variables")
+            raise ValueError("API credentials not found in .env file")
         
         # Initialize modules
         self.client = None
@@ -166,13 +160,24 @@ class GridTradingBot:
                 logger.error("Cannot start: Kill-switch is active")
                 return
             
-            # Setup initial grid
-            logger.info(f"Setting up grid with profile: {self.active_profile}")
-            success = await self.grid.setup_grid(self.active_profile)
+            # Check if we already have active orders (resume scenario)
+            existing_orders = await self.client.get_open_orders(
+                self.config['trading']['symbol'],
+                self.config['trading']['category']
+            )
             
-            if not success:
-                logger.error("Failed to setup grid")
-                return
+            if existing_orders and len(existing_orders) > 0:
+                logger.info(f"✓ Found {len(existing_orders)} existing orders, resuming monitoring...")
+                # Load existing grid state
+                await self._load_existing_grid()
+            else:
+                # Setup new grid only if no existing orders
+                logger.info(f"Setting up new grid with profile: {self.active_profile}")
+                success = await self.grid.setup_grid(self.active_profile)
+                
+                if not success:
+                    logger.error("Failed to setup grid")
+                    return
             
             self.running = True
             logger.info("✓ Trading started successfully")
@@ -189,6 +194,41 @@ class GridTradingBot:
             logger.error(f"Error starting trading: {e}")
             self.running = False
             raise
+    
+    async def _load_existing_grid(self):
+        """Load existing grid state from active orders"""
+        try:
+            orders = await self.client.get_open_orders(
+                self.config['trading']['symbol'],
+                self.config['trading']['category']
+            )
+            
+            buy_orders = []
+            sell_orders = []
+            
+            for order in orders:
+                side = order.get('side')
+                price = safe_float(order.get('price', '0'), 0.0)
+                qty = safe_float(order.get('qty', '0'), 0.0)
+                
+                if side == 'Buy':
+                    buy_orders.append(price)
+                elif side == 'Sell':
+                    sell_orders.append(price)
+            
+            if buy_orders and sell_orders:
+                # Estimate center as midpoint between highest buy and lowest sell
+                highest_buy = max(buy_orders)
+                lowest_sell = min(sell_orders)
+                self.grid.center_price = (highest_buy + lowest_sell) / 2
+                
+                logger.info(f"Loaded existing grid: {len(buy_orders)} BUY + {len(sell_orders)} SELL orders")
+                logger.info(f"Estimated center: {self.grid.center_price:.4f}")
+            else:
+                logger.warning("Could not determine grid center from existing orders")
+                
+        except Exception as e:
+            logger.error(f"Error loading existing grid: {e}")
     
     async def stop_trading(self):
         """Stop the trading bot"""
@@ -210,6 +250,9 @@ class GridTradingBot:
         """Monitor and handle order fills"""
         logger.info("Starting order monitor...")
         
+        # Track processed executions to avoid duplicates
+        processed_exec_ids = set()
+        
         while self.running:
             try:
                 if self.risk.kill_switch_active:
@@ -227,8 +270,16 @@ class GridTradingBot:
                     order_id = exec_data.get('orderId')
                     exec_id = exec_data.get('execId')
                     
-                    # Check if we've already processed this execution
-                    # (simplified - in production would check DB)
+                    # Skip if already processed
+                    if exec_id in processed_exec_ids:
+                        continue
+                    
+                    # Mark as processed
+                    processed_exec_ids.add(exec_id)
+                    
+                    # Clean old exec_ids (keep only last 1000)
+                    if len(processed_exec_ids) > 1000:
+                        processed_exec_ids = set(list(processed_exec_ids)[-500:])
                     
                     side = exec_data.get('side')
                     price = safe_float(exec_data.get('execPrice', '0'), 0.0)
