@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: botgrid
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python ui_server.py
+    envVars:
+      - key: BYBIT_API_KEY
+        sync: false
+      - key: BYBIT_API_SECRET
+        sync: false
+      - key: ENVIRONMENT
+        value: mainnet
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /api/status
+    autoDeploy: true

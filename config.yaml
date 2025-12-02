@@ -1,0 +1,90 @@
+# Bybit Grid Bot Configuration
+
+# API Settings
+api:
+  testnet: true  # Set to false for mainnet
+  base_url_testnet: "https://api-testnet.bybit.com"
+  base_url_mainnet: "https://api.bybit.com"
+  recv_window: 5000
+  
+# Trading Settings
+trading:
+  symbol: "XRPUSDT"
+  category: "linear"  # Unified Futures
+  initial_capital: 100  # USDT
+  leverage: 1  # Keep low for safety
+  
+# Grid Strategy Settings
+grid:
+  target_buy_levels: 6  # Number of buy levels below center
+  target_sell_levels: 6  # Number of sell levels above center
+  grid_spacing_min: 0.0015  # 0.15% minimum distance between levels
+  grid_spacing_max: 0.0035  # 0.35% maximum distance between levels
+  profit_per_grid_min: 0.0015  # 0.15% minimum profit target
+  profit_per_grid_max: 0.0030  # 0.30% maximum profit target
+  
+  # Strategy Profiles
+  profiles:
+    Conservative:
+      grid_spacing: 0.0035  # 0.35%
+      target_levels: 3  # 3 BUY + 3 SELL = 6 total (perfect for $45)
+      profit_target: 0.0030  # 0.30%
+    Normal:
+      grid_spacing: 0.0025  # 0.25%
+      target_levels: 5  # 5 BUY + 5 SELL = 10 total
+      profit_target: 0.0020  # 0.20%
+    Aggressive:
+      grid_spacing: 0.0015  # 0.15%
+      target_levels: 7  # 7 BUY + 7 SELL = 14 total
+      profit_target: 0.0015  # 0.15%
+
+# Recenter Conditions
+recenter:
+  price_deviation_pct: 0.02  # 2% - recenter if price moves outside grid
+  time_based_hours: 24  # Recenter every 24 hours
+  one_side_hours: 10  # Recenter if price stays on one side for 10 hours
+  pump_dump_pct: 0.05  # 5% - recenter on sudden price movements
+  
+# Risk Management
+risk:
+  max_exposure_pct: 0.40  # 40% of total capital
+  kill_switch_drawdown_pct: 0.10  # 10% drawdown triggers kill switch
+  max_position_size_pct: 0.20  # 20% per position
+  
+# Order Settings
+orders:
+  order_type: "Limit"
+  time_in_force: "PostOnly"
+  reduce_only: false
+  close_on_trigger: false
+  
+# Rate Limiting
+rate_limit:
+  requests_per_second: 10
+  burst_limit: 20
+  
+# Database
+database:
+  path: "data/grid_bot.db"
+  backup_interval_hours: 24
+  
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_file: "logs/grid_bot.log"
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5
+  console_output: true
+  
+# Web UI
+web_ui:
+  host: "0.0.0.0"
+  port: 8000
+  refresh_interval_seconds: 5
+  enable_cors: true
+  
+# Monitoring
+monitoring:
+  snapshot_interval_minutes: 5
+  health_check_interval_seconds: 60
+  alert_on_errors: true

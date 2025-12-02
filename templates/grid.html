@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Trading Bot - Grid Levels</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>⚡ Grid Bot</h2>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/grid" class="nav-link active">
+                    <span class="icon">📈</span>
+                    Grid Levels
+                </a>
+                <a href="/positions" class="nav-link">
+                    <span class="icon">💼</span>
+                    Positions
+                </a>
+                <a href="/history" class="nav-link">
+                    <span class="icon">📜</span>
+                    History
+                </a>
+                <a href="/settings" class="nav-link">
+                    <span class="icon">⚙️</span>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1>Grid Levels</h1>
+                    <span class="subtitle">Active buy and sell orders</span>
+                </div>
+                <div class="header-right">
+                    <div class="status-badge" id="botStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Grid Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Center Price</span>
+                        <span class="stat-icon">🎯</span>
+                    </div>
+                    <div class="stat-value" id="centerPrice">$0.0000</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Current Price</span>
+                        <span class="stat-icon">💹</span>
+                    </div>
+                    <div class="stat-value" id="currentPrice">$0.0000</div>
+                    <div class="stat-subtitle" id="pricePosition">At center</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Buy Orders</span>
+                        <span class="stat-icon">🟢</span>
+                    </div>
+                    <div class="stat-value" id="buyOrdersCount">0</div>
+                    <div class="stat-subtitle">Active below center</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Sell Orders</span>
+                        <span class="stat-icon">🔴</span>
+                    </div>
+                    <div class="stat-value" id="sellOrdersCount">0</div>
+                    <div class="stat-subtitle">Active above center</div>
+                </div>
+            </div>
+
+            <!-- Grid Visualization -->
+            <div class="grid-viz-container">
+                <div class="grid-viz-card">
+                    <h3>Grid Visualization</h3>
+                    <div class="grid-viz" id="gridVisualization">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Tables -->
+            <div class="tables-row">
+                <!-- Sell Orders -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>🔴 Sell Orders (Above Center)</h3>
+                        <span class="badge" id="sellBadge">0 orders</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Notional</th>
+                                    <th>Distance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sellOrders">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Buy Orders -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>🟢 Buy Orders (Below Center)</h3>
+                        <span class="badge" id="buyBadge">0 orders</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Notional</th>
+                                    <th>Distance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="buyOrders">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/grid.js"></script>
+    <script>
+        // Auto-refresh every 5 seconds
+        setInterval(updateGridLevels, 5000);
+        
+        // Initial load
+        updateGridLevels();
+    </script>
+</body>
+</html>

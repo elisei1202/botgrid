@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Trading Bot - Settings</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h2>⚡ Grid Bot</h2></div>
+            <nav class="nav">
+                <a href="/" class="nav-link"><span class="icon">📊</span>Dashboard</a>
+                <a href="/grid" class="nav-link"><span class="icon">📈</span>Grid Levels</a>
+                <a href="/positions" class="nav-link"><span class="icon">💼</span>Positions</a>
+                <a href="/history" class="nav-link"><span class="icon">📜</span>History</a>
+                <a href="/settings" class="nav-link active"><span class="icon">⚙️</span>Settings</a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <h1>Settings</h1>
+                    <span class="subtitle">Configure trading strategy</span>
+                </div>
+            </header>
+
+            <!-- Strategy Profile -->
+            <div class="settings-card">
+                <h3>Trading Strategy Profile</h3>
+                <p class="settings-desc">Choose your risk/reward profile. This will adjust grid spacing and number of levels.</p>
+                
+                <div class="profile-selector">
+                    <div class="profile-option" onclick="selectProfile('Conservative')">
+                        <div class="profile-header">
+                            <input type="radio" name="profile" value="Conservative" id="profileConservative">
+                            <label for="profileConservative">
+                                <h4>🛡️ Conservative</h4>
+                            </label>
+                        </div>
+                        <p>Wider grid spacing (0.35%), fewer levels (5), higher profit target (0.30%)</p>
+                        <div class="profile-stats">
+                            <span>Grid Spacing: 0.35%</span>
+                            <span>Levels: 5</span>
+                            <span>Profit: 0.30%</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-option active" onclick="selectProfile('Normal')">
+                        <div class="profile-header">
+                            <input type="radio" name="profile" value="Normal" id="profileNormal" checked>
+                            <label for="profileNormal">
+                                <h4>⚖️ Normal</h4>
+                            </label>
+                        </div>
+                        <p>Balanced grid spacing (0.25%), moderate levels (6), balanced profit (0.20%)</p>
+                        <div class="profile-stats">
+                            <span>Grid Spacing: 0.25%</span>
+                            <span>Levels: 6</span>
+                            <span>Profit: 0.20%</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-option" onclick="selectProfile('Aggressive')">
+                        <div class="profile-header">
+                            <input type="radio" name="profile" value="Aggressive" id="profileAggressive">
+                            <label for="profileAggressive">
+                                <h4>🚀 Aggressive</h4>
+                            </label>
+                        </div>
+                        <p>Tighter grid spacing (0.15%), more levels (8), lower profit target (0.15%)</p>
+                        <div class="profile-stats">
+                            <span>Grid Spacing: 0.15%</span>
+                            <span>Levels: 8</span>
+                            <span>Profit: 0.15%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveProfile()">Apply Profile</button>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="settings-card">
+                <h3>Risk Management</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Max Exposure</label>
+                        <div class="setting-value">40%</div>
+                        <p class="setting-note">Maximum capital allocated to positions</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>Kill-Switch Drawdown</label>
+                        <div class="setting-value">10%</div>
+                        <p class="setting-note">Stop trading if drawdown exceeds this</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>Max Position Size</label>
+                        <div class="setting-value">20%</div>
+                        <p class="setting-note">Maximum size per position</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recenter Settings -->
+            <div class="settings-card">
+                <h3>Grid Recenter Conditions</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Price Deviation</label>
+                        <div class="setting-value">2%</div>
+                        <p class="setting-note">Recenter if price moves outside grid by this %</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>Time-Based Recenter</label>
+                        <div class="setting-value">24 hours</div>
+                        <p class="setting-note">Recenter every N hours</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>Pump/Dump Detection</label>
+                        <div class="setting-value">5%</div>
+                        <p class="setting-note">Recenter on sudden price movement</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Configuration -->
+            <div class="settings-card">
+                <h3>Current Configuration</h3>
+                <div class="config-display" id="currentConfig">
+                    <div class="config-item">
+                        <span class="config-label">Symbol:</span>
+                        <span class="config-value">XRPUSDT</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Active Profile:</span>
+                        <span class="config-value" id="activeProfile">Loading...</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Grid Spacing:</span>
+                        <span class="config-value" id="gridSpacing">Loading...</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Target Levels:</span>
+                        <span class="config-value" id="targetLevels">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Actions -->
+            <div class="settings-card danger-zone">
+                <h3>⚠️ Emergency Actions</h3>
+                <div class="emergency-actions">
+                    <button class="btn btn-danger" onclick="deactivateKillSwitch()">
+                        Deactivate Kill-Switch
+                    </button>
+                    <p class="warning-text">Use only if kill-switch was triggered incorrectly</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/settings.js"></script>
+    <script>
+        loadSettings();
+    </script>
+</body>
+</html>

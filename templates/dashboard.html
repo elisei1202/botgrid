@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Trading Bot - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>⚡ Grid Bot</h2>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link active">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/grid" class="nav-link">
+                    <span class="icon">📈</span>
+                    Grid Levels
+                </a>
+                <a href="/positions" class="nav-link">
+                    <span class="icon">💼</span>
+                    Positions
+                </a>
+                <a href="/history" class="nav-link">
+                    <span class="icon">📜</span>
+                    History
+                </a>
+                <a href="/settings" class="nav-link">
+                    <span class="icon">⚙️</span>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1>Dashboard</h1>
+                    <span class="subtitle" id="currentTime"></span>
+                </div>
+                <div class="header-right">
+                    <div class="status-badge" id="botStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Loading...</span>
+                    </div>
+                    <button class="btn btn-primary" id="startStopBtn" onclick="toggleBot()">
+                        Start Trading
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Equity</span>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="stat-value" id="totalEquity">$0.00</div>
+                    <div class="stat-change positive" id="equityChange">+0.00%</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Available Balance</span>
+                        <span class="stat-icon">💵</span>
+                    </div>
+                    <div class="stat-value" id="availableBalance">$0.00</div>
+                    <div class="stat-subtitle">Ready to trade</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">24h PnL</span>
+                        <span class="stat-icon">📈</span>
+                    </div>
+                    <div class="stat-value" id="pnl24h">$0.00</div>
+                    <div class="stat-change" id="pnlChange">0.00%</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">24h Trades</span>
+                        <span class="stat-icon">🔄</span>
+                    </div>
+                    <div class="stat-value" id="trades24h">0</div>
+                    <div class="stat-subtitle">Executions</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Equity Chart</h3>
+                        <select id="chartPeriod" onchange="updateEquityChart()">
+                            <option value="24">24 Hours</option>
+                            <option value="168">7 Days</option>
+                            <option value="720">30 Days</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Info & Risk -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Grid Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Symbol:</span>
+                        <span class="info-value" id="symbol">XRPUSDT</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Center Price:</span>
+                        <span class="info-value" id="centerPrice">$0.0000</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Current Price:</span>
+                        <span class="info-value" id="currentPrice">$0.0000</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Active Orders:</span>
+                        <span class="info-value" id="activeOrders">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Profile:</span>
+                        <span class="info-value badge" id="activeProfile">Normal</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Risk Management</h3>
+                    <div class="info-row">
+                        <span class="info-label">Exposure:</span>
+                        <span class="info-value" id="exposure">0%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Max Exposure:</span>
+                        <span class="info-value">40%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Current Drawdown:</span>
+                        <span class="info-value" id="drawdown">0%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kill-Switch:</span>
+                        <span class="info-value" id="killSwitch">Inactive</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Available for Trading:</span>
+                        <span class="info-value" id="availableTrading">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Trades -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Recent Trades</h3>
+                    <a href="/history" class="btn-link">View All →</a>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Side</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Fee</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTrades">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Auto-refresh every 5 seconds
+        setInterval(updateDashboard, 5000);
+        
+        // Initial load
+        updateDashboard();
+        updateEquityChart();
+        
+        // Update time
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>

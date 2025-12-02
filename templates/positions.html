@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Trading Bot - Positions</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><h2>⚡ Grid Bot</h2></div>
+            <nav class="nav">
+                <a href="/" class="nav-link"><span class="icon">📊</span>Dashboard</a>
+                <a href="/grid" class="nav-link"><span class="icon">📈</span>Grid Levels</a>
+                <a href="/positions" class="nav-link active"><span class="icon">💼</span>Positions</a>
+                <a href="/history" class="nav-link"><span class="icon">📜</span>History</a>
+                <a href="/settings" class="nav-link"><span class="icon">⚙️</span>Settings</a>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <h1>Active Positions</h1>
+                    <span class="subtitle">Current open positions</span>
+                </div>
+            </header>
+            <div class="table-card">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Size</th>
+                                <th>Entry Price</th>
+                                <th>Mark Price</th>
+                                <th>Unrealized PnL</th>
+                                <th>Position Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTable">
+                            <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/positions.js"></script>
+    <script>setInterval(updatePositions, 5000); updatePositions();</script>
+</body>
+</html>
