@@ -428,23 +428,53 @@ class GridLogic:
     
     async def should_recenter(self) -> Tuple[bool, str]:
         """
-        Check if grid should be recentered
+        Check if grid should be recentered based on ACTIVE orders from Bybit
         Returns: (should_recenter, reason)
         """
-        
-        if not self.buy_levels or not self.sell_levels:
-            return False, ""
         
         current_price = await self.get_current_price()
         if current_price <= 0:
             return False, ""
         
-        lowest_buy = self.buy_levels[-1]['price'] if self.buy_levels else 0
-        highest_sell = self.sell_levels[-1]['price'] if self.sell_levels else 0
+        # Get ACTIVE orders from Bybit (not from memory)
+        try:
+            active_orders = await self.client.get_open_orders(
+                self.symbol,
+                self.category
+            )
+            
+            if not active_orders or len(active_orders) == 0:
+                # No active orders - should setup new grid
+                return True, "No active orders found"
+            
+            # Extract buy and sell prices from ACTIVE orders
+            buy_prices = []
+            sell_prices = []
+            
+            for order in active_orders:
+                side = order.get('side')
+                price = safe_float(order.get('price', '0'), 0.0)
+                
+                if side == 'Buy':
+                    buy_prices.append(price)
+                elif side == 'Sell':
+                    sell_prices.append(price)
+            
+            if not buy_prices or not sell_prices:
+                return False, ""
+            
+            lowest_buy = min(buy_prices)
+            highest_sell = max(sell_prices)
+            
+        except Exception as e:
+            logger.error(f"Error checking active orders for recenter: {e}")
+            return False, ""
         
         recenter_config = self.config['recenter']
         
-        # 1. Price deviation check (2%)
+        # ===== RECENTER CONDITIONS =====
+        
+        # 1. Price deviation check (2% - back to original)
         deviation_pct = recenter_config['price_deviation_pct']
         if current_price > highest_sell * (1 + deviation_pct):
             return True, f"Price {current_price:.4f} > highest sell {highest_sell:.4f} + {deviation_pct*100}%"
@@ -452,14 +482,14 @@ class GridLogic:
         if current_price < lowest_buy * (1 - deviation_pct):
             return True, f"Price {current_price:.4f} < lowest buy {lowest_buy:.4f} - {deviation_pct*100}%"
         
-        # 2. Time-based recenter (24 hours)
+        # 2. Time-based recenter (48 hours - once every 2 days)
         hours_since_recenter = (datetime.utcnow() - self.last_recenter_time).total_seconds() / 3600
         time_threshold = recenter_config['time_based_hours']
         
         if hours_since_recenter >= time_threshold:
             return True, f"Time-based recenter: {hours_since_recenter:.1f}h >= {time_threshold}h"
         
-        # 3. One-side dominance (price stays above/below center for too long)
+        # 3. One-side dominance (24 hours - very patient)
         if len(self.price_history) >= 60:  # Need at least 1 hour of data
             recent_hours = recenter_config['one_side_hours']
             cutoff_time = datetime.utcnow() - timedelta(hours=recent_hours)
