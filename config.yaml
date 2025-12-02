@@ -11,7 +11,7 @@ api:
 trading:
   symbol: "XRPUSDT"
   category: "linear"  # Unified Futures
-  initial_capital: 45  # USDT
+  initial_capital: 100  # USDT
   leverage: 3  # Keep low for safety
   
 # Grid Strategy Settings
