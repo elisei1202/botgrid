@@ -47,7 +47,7 @@ recenter:
   
 # Risk Management
 risk:
-  max_exposure_pct: 0.40  # 40% of total capital
+  max_exposure_pct: 0.05  # 40% of total capital
   kill_switch_drawdown_pct: 0.10  # 10% drawdown triggers kill switch
   max_position_size_pct: 0.20  # 20% per position
   
